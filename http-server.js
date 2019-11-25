@@ -2,6 +2,7 @@ const logger = require('./utils/logger');
 const express = require('express');
 const bodyParser = require('body-parser')
 const app = express();
+const { redis, client } = require('./redis')(5)
 
 
 app.use(bodyParser.json());
@@ -21,11 +22,13 @@ app.post('/postman', (req, res) => {
     res.send('Hello World post!\n');
 });
 
-var listen = function (port) {
-    app.listen(port, () => {
-        console.log(`listn : ${port}`)
-        logger.info(`Example app listening on port ${port}!`)
-    });
-}
 
-module.exports = listen
+app.get('/postman', (req, res) => {
+    console.log(req.body)
+    console.log(redis)
+    console.log(client)
+    res.send('Hello World post!\n');
+});
+
+
+module.exports = app

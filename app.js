@@ -1,3 +1,15 @@
-let http_server = require('./http-server')
+redis_conn_count = 1
 
-http_server(3000)
+let app = require('./http-server')
+let { client } = require('./redis')(redis_conn_count)
+
+port = 3000
+
+client.init((err) => {
+    if (err) throw err;
+
+    app.listen(port, () => {
+        console.log('Example app listening on port ' + port);
+    })
+
+});
