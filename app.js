@@ -1,15 +1,12 @@
-redis_conn_count = 1
-
+const logger = require('./utils/logger')
+const config = require('./configure')
+const { client } = require('./redis') 
+client.init()
 let app = require('./http-server')
-let { client } = require('./redis')(redis_conn_count)
+port = config['APIF']['port']
 
-port = 3000
+app.listen(parseInt(port), () => {
+    logger.info(`[APIF] listening on port : ${port}`)
+    console.log('Example app listening on port ' + port);
+})
 
-client.init((err) => {
-    if (err) throw err;
-
-    app.listen(port, () => {
-        console.log('Example app listening on port ' + port);
-    })
-
-});
