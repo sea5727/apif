@@ -12,6 +12,20 @@ function timeStampFormat() {
     return moment().format('YYYY-MM-DD HH:mm:ss.SSS ZZ');
 };
 
+const jsonFormatter = (logEntry) => {
+    if (logEntry.type) {
+        const base = {
+            timestamp: new Date()
+        };
+        const json = Object.assign(base, logEntry);
+        logEntry[MESSAGE] = JSON.stringify(json);
+    } else {
+        logEntry = "";
+    }
+
+    return logEntry;
+}
+
 module.exports = logger = winston.createLogger({
     transports: [
         new (winston.transports.Console)({
@@ -19,7 +33,7 @@ module.exports = logger = winston.createLogger({
                 winston.format.colorize(),
                 winston.format.timestamp(),
                 winston.format.align(),
-                winston.format.simple(),
+                winston.format.json(),
             ),
             level: 'debug'
         }),
@@ -27,7 +41,7 @@ module.exports = logger = winston.createLogger({
             filename: `${logDir}/-results.log`,
             format: winston.format.combine(
                 winston.format.timestamp(),
-                winston.format.simple(),
+                winston.format.json(),
             )
         }),
     ]

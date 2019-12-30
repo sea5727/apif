@@ -1,7 +1,11 @@
 const logger = require('./utils/logger')
 const config = require('./configure')
-const { client } = require('./redis') 
-client.init()
+// const { redisClient } = require('./redis') 
+//redisClient.init()
+const { RedisManager } = require('./redis')
+let manager = new RedisManager()
+manager.start()
+
 let app = require('./http-server')
 port = config['APIF']['port']
 
