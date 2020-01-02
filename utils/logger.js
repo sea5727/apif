@@ -1,10 +1,15 @@
+const config = require('./configure')
 const fs = require("fs");
 const winston = require("winston");
 const winston_daily_rotate_file = require("winston-daily-rotate-file")
-const logDir = "log";
 
-if (!fs.existsSync(logDir)) {
-    fs.mkdirSync(logDir);
+let logLevel = `debug`
+let logPath = './apif.log'
+if('log_path' in config){
+    logPath = config.log_path
+}
+if('log_level' in config){
+    logLevel = config.log_level.toLowerCase()
 }
 
 //const tsFormat = () => (new Date()).toLocaleTimeString();
@@ -38,7 +43,7 @@ module.exports = logger = winston.createLogger({
             level: 'debug'
         }),
         new (winston_daily_rotate_file)({
-            filename: `${logDir}/-results.log`,
+            filename: `${logPath}`,
             format: winston.format.combine(
                 winston.format.timestamp(),
                 winston.format.json(),

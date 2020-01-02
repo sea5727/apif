@@ -4,18 +4,24 @@
   "description": "pgw3 api server",
   "main": "redis.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "pkg ."
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
     "async": "^3.1.0",
     "body-parser": "^1.19.0",
+    "commander": "^4.0.1",
     "express": "^4.17.1",
     "express-validator": "^6.3.0",
+    "i": "^0.3.6",
     "ini": "^1.3.5",
+    "npm": "^6.13.4",
     "redis": "^2.8.0",
     "winston": "^3.2.1",
     "winston-daily-rotate-file": "^4.2.1"
+  },
+  "bin": {
+    "app": "./app.js"
   }
 }

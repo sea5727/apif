@@ -1,6 +1,6 @@
 const redis = require('redis')
-const config = require('./configure')
-
+const logger = require('./utils/logger')
+const config = require('./utils/configure')
 class ApifRedis {
     constructor(){
         this._states = {
@@ -18,7 +18,14 @@ class ApifRedis {
     }
     connect(){
         this._state = this._states._CONNECTING
-        this.client = redis.createClient()
+        this.option = {}
+        if('redis_host' in config){
+            this.option['host'] = config.redis_host
+        }
+        if('redis_port' in config){
+            this.option['port'] = config.redis_port
+        }
+        this.client = redis.createClient(this.option)
 
         this.client.on('connect', () => {
             this._state = this._states._CONNECTED
@@ -28,7 +35,17 @@ class ApifRedis {
             logformat += `connected : ${this.client.connected} `
             logformat += `ready : ${this.client.ready} `
             logformat += `sock : ${this.client.stream._handle.fd}`
-            console.log(logformat)
+            logger.info(logformat)
+            
+        })
+        this.client.on('reconnecting', () => {
+            this._state = this._states._CONNECTING
+            let logformat = `redis reconnecting !! `
+            logformat += `ip/port : ${this.client.address} `
+            logformat += `id : ${this.client.connection_id} `
+            logformat += `connected : ${this.client.connected} `
+            logformat += `ready : ${this.client.ready} `
+            logger.info(logformat)
             
         })
         this.client.on('error', (err) => {
@@ -40,7 +57,7 @@ class ApifRedis {
                 logformat += `connected : ${this.client.connected} `
                 logformat += `ready : ${this.client.ready} `
                 logformat += `error' : ${err.message}`
-                console.log(logformat)
+                logger.info(logformat)
             }
         })
         this.client.on('ready', () => {
@@ -50,7 +67,7 @@ class ApifRedis {
             logformat += `connected : ${this.client.connected} `
             logformat += `ready : ${this.client.ready} `
             logformat += `sock : ${this.client.stream._handle.fd}`
-            console.log(logformat)
+            logger.info(logformat)
         })
         this.client.on('warning', () => {
             let logformat = `redis warning !! `
@@ -59,10 +76,10 @@ class ApifRedis {
             logformat += `connected : ${this.client.connected} `
             logformat += `ready : ${this.client.ready} `
             logformat += `sock : ${this.client.stream._handle.fd}`
-            console.log(logformat)
+            logger.info(logformat)
         })
         this.client.on('close', () => {
-            console.log('client on close test')
+            logger.info('client on close test')
         })
         this.client.on('end', () => {
             this._state = this._states._DISCONNECTED
@@ -71,7 +88,7 @@ class ApifRedis {
             logformat += `id : ${this.client.connection_id} `
             logformat += `connected : ${this.client.connected} `
             logformat += `ready : ${this.client.ready} `
-            console.log(logformat)
+            logger.info(logformat)
         })
 
         return this
@@ -113,7 +130,6 @@ class RedisManager {
             let value = this.arrRedisSessions[idx].connect()
             if(value.isConnected() == true)
                 flag |= value.isConnected()
-            console.log(value)
         }
         if(flag == true){
             this._state = this._states._START
@@ -127,119 +143,4 @@ class RedisManager {
     }
 }
 
-
-
-// pgw2Redis.instance = null
-
-// pgw2Redis.getInstance = function(){
-//     if(this.instance == null){
-//         this.instance = new pgw2Redis()
-//     }
-        
-//     return this.instance
-// }
-
 module.exports = { RedisManager } 
-
-// pgw2Redis = function getRedisClient() {
-//     const redisClient = {
-//         db_0 : null,
-//         db_1 : null,
-//         db_2 : null,
-
-//         init: function() {
-//             console.log('redis init??')
-//             console.log('test log ' , config['APIF']['port'])
-//             db_0 = createClient()
-//             db_1 = createClient()
-//             db_2 = createClient()
-//             // const select = redis.RedisClient.prototype.select
-
-//             // require('async').parallel([
-//             //     select.bind(redisClient.db_0, 0),
-//             //     select.bind(redisClient.db_1, 1),
-//             //     select.bind(redisClient.db_2, 2)
-//             // ], next)
-
-//         },
-//     }
-
-//     function createClient() {
-//         // const client = redis.createClient(config.port, config.host)
-//         const client = redis.createClient()
-
-//         client.on('connect', () => {
-//             logformat = `redis connect !! `
-//             logformat += `ip/port : ${this.client.address} `
-//             logformat += `id : ${this.client.connection_id} `
-//             logformat += `connected : ${this.client.connected} `
-//             logformat += `ready : ${this.client.ready} `
-//             logformat += `sock : ${this.client.stream._handle.fd}`
-//             console.log(logformat)
-            
-//         })
-
-
-//         client.on('error', (err) => {
-//             if (err) {
-//                 logformat = `redis error !! `
-//                 logformat += `ip/port : ${this.client.address} `
-//                 logformat += `id : ${this.client.connection_id} `
-//                 logformat += `connected : ${this.client.connected} `
-//                 logformat += `ready : ${this.client.ready} `
-//                 logformat += `error' : ${err.message}`
-//                 console.log(logformat)
-//             }
-//         })
-
-//         client.on('ready', () => {
-//             logformat = `redis ready !! `
-//             logformat += `ip/port : ${this.client.address} `
-//             logformat += `id : ${this.client.connection_id} `
-//             logformat += `connected : ${this.client.connected} `
-//             logformat += `ready : ${this.client.ready} `
-//             logformat += `sock : ${this.client.stream._handle.fd}`
-//             console.log(logformat)
-//         })
-
-//         client.on('warning', (a0, a1, a2, a3, a4) => {
-//             logformat = `redis warning !! `
-//             logformat += `ip/port : ${this.client.address} `
-//             logformat += `id : ${this.client.connection_id} `
-//             logformat += `connected : ${this.client.connected} `
-//             logformat += `ready : ${this.client.ready} `
-//             logformat += `sock : ${this.client.stream._handle.fd}`
-//             console.log(logformat)
-//         })
-
-//         client.on('close', (a0, a1, a2, a3, a4) => {
-//             console.log('client on close test' , a0, a1, a2, a3, a4)
-//         })
-
-
-//         client.on('end', (a0, a1, a2, a3, a4) => {
-//             logformat = `redis end !! `
-//             logformat += `ip/port : ${this.client.address} `
-//             logformat += `id : ${this.client.connection_id} `
-//             logformat += `connected : ${this.client.connected} `
-//             logformat += `ready : ${this.client.ready} `
-//             console.log(logformat)
-//         })
-
-//         return client
-//     }
-
-//     return { redis : redis, redisClient : redisClient }
-// }
-
-// pgw2Redis.instance = null
-
-// pgw2Redis.getInstance = function(){
-//     if(this.instance == null){
-//         this.instance = new pgw2Redis()
-//     }
-        
-//     return this.instance
-// }
-
-// module.exports = pgw2Redis.getInstance()
